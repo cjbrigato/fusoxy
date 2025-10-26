@@ -1,0 +1,254 @@
+{
+  "repo_notes": [
+    {
+      "content": "",
+      "author": "Colin J. Brigato <colin@brigato.fr>"
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "Introduce the fusoxy project, its purpose as an HTTP proxy for generating disposable proxified URLs, and high-level architecture",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Architecture",
+      "purpose": "Explain the overall system architecture, component relationships, and data flow through the application",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Application Entry Point",
+      "purpose": "Document the main.go entry point and server initialization process",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Configuration System",
+      "purpose": "Explain the constants package, API versioning, and resource handler path definitions",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Server Layer",
+      "purpose": "Detail the server package components including initialization, routing, handlers, and response formatting",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Database Layer",
+      "purpose": "Explain the resource database implementations, storage mechanisms, and resource lifecycle management",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "External Dependencies",
+      "purpose": "Document the external libraries used (Echo, shortuuid, etc.) and their roles in the system",
+      "parent": "Architecture",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Core Concepts",
+      "purpose": "Explain the fundamental concepts and domain models in fusoxy: resource types, lifecycles, and security",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Resource Types",
+      "purpose": "Define and explain the four resource types: RemoteResource, ProxyResource, FusibleResource, and their relationships",
+      "parent": "Core Concepts",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "URL Lifecycle",
+      "purpose": "Explain the complete lifecycle of a URL from registration through fusible creation to consumption and deletion",
+      "parent": "Core Concepts",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Security and Encoding",
+      "purpose": "Document the security mechanisms including base64 encoding, SHA256 hashing, and single-use tokens",
+      "parent": "Core Concepts",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "API Reference",
+      "purpose": "Comprehensive reference for all HTTP endpoints, request formats, and response structures",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Remote Resource Endpoints",
+      "purpose": "Document the /remote/:rid endpoint for persistent URL registration and lookup",
+      "parent": "API Reference",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Fusible Resource Creation",
+      "purpose": "Document the /proxy/:rid endpoint for converting remote resources to fusible resources",
+      "parent": "API Reference",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Fuse Proxy Endpoint",
+      "purpose": "Document the /fuse/:fid endpoint for consuming fusible resources and proxying requests",
+      "parent": "API Reference",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Disposable Resource Endpoint",
+      "purpose": "Document the /disposable/:url endpoint for one-shot URL proxying without persistence",
+      "parent": "API Reference",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Implementation Details",
+      "purpose": "Deep dive into implementation specifics including algorithms, data structures, and concurrency patterns",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "RemoteRessourceDB Implementation",
+      "purpose": "Explain the persistent resource database implementation including hashing, deduplication, and thread safety",
+      "parent": "Implementation Details",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "FusibleRessourceDB Implementation",
+      "purpose": "Explain the ephemeral resource database including single-use consumption and sync.Once mechanism",
+      "parent": "Implementation Details",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Request Handler Implementation",
+      "purpose": "Detail the FusibleHandlers struct and the implementation of each HTTP handler method",
+      "parent": "Implementation Details",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Reverse Proxy Mechanism",
+      "purpose": "Explain the httputil.ReverseProxy configuration including URL rewriting and query parameter handling",
+      "parent": "Implementation Details",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Response Formatting",
+      "purpose": "Document the response structures and constructor functions for standardized API responses",
+      "parent": "Implementation Details",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Development Guide",
+      "purpose": "Guide for developers working with fusoxy including setup, building, and understanding dependencies",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Building and Running",
+      "purpose": "Instructions for building the application, running the server, and initial configuration",
+      "parent": "Development Guide",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Dependency Management",
+      "purpose": "Explain the Go module system, dependencies used, and their purposes",
+      "parent": "Development Guide",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    }
+  ]
+}
