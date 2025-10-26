@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"net/http"
 	"net/url"
 	"sync"
 
@@ -19,8 +20,9 @@ func NewRemoteRessourceDB() *RemoteRessourceDB {
 }
 
 type RemoteRessource struct {
-	ID  string   `json:"id"`
-	URL *SafeURL `json:"url"`
+	ID      string                  `json:"id"`
+	URL     *SafeURL                `json:"url"`
+	RuleSet *RemoteRessourceRuleSet `json:"rule_set,omitempty"`
 }
 
 type SafeURL struct {
@@ -80,14 +82,18 @@ func MakeProxyRessource(us string) (*ProxyRessource, error) {
 	return &ProxyRessource{url: safeUrl, ID: hash}, nil
 }
 
-func (r *RemoteRessourceDB) GetOrSet(us string) (*ProxyRessource, error) {
+func (r *RemoteRessourceDB) GetOrSet(us string, ruleSet *RemoteRessourceRuleSet, override bool) (*ProxyRessource, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	// is and id of existing?
 	res, ok := r.idToRessource[us]
 	if ok {
-		return &ProxyRessource{url: res.URL, ID: us}, nil
+		if !override {
+			return &ProxyRessource{url: res.URL, ID: us, RuleSet: res.RuleSet}, nil
+		}
 	}
+
+	fmt.Println("Getting or setting remote ressource: ", us)
 
 	// parses as proper url ?
 	parsedURL, err := url.Parse(us)
@@ -102,7 +108,9 @@ func (r *RemoteRessourceDB) GetOrSet(us string) (*ProxyRessource, error) {
 	// already exists in known ressources?
 	res, ok = r.idToRessource[hash]
 	if ok {
-		return &ProxyRessource{url: res.URL, ID: hash}, nil
+		if !override {
+			return &ProxyRessource{url: res.URL, ID: hash, RuleSet: res.RuleSet}, nil
+		}
 	}
 
 	safeUrl, err := NewSafeURL(us)
@@ -110,13 +118,14 @@ func (r *RemoteRessourceDB) GetOrSet(us string) (*ProxyRessource, error) {
 		return nil, err
 	}
 
-	r.idToRessource[hash] = &RemoteRessource{ID: hash, URL: safeUrl}
+	r.idToRessource[hash] = &RemoteRessource{ID: hash, URL: safeUrl, RuleSet: ruleSet}
 	return &ProxyRessource{url: safeUrl, ID: hash}, nil
 }
 
 type ProxyRessource struct {
-	url *SafeURL
-	ID  string `json:"id"`
+	url     *SafeURL
+	ID      string                  `json:"id"`
+	RuleSet *RemoteRessourceRuleSet `json:"rule_set,omitempty"`
 }
 
 func (p *ProxyRessource) URL() string {
@@ -127,6 +136,7 @@ type FusibleRessource struct {
 	ID             string          `json:"id"`
 	ProxyRessource *ProxyRessource `json:"proxy_ressource"`
 	melted         sync.Once
+	RuleSet        *FusibleRessourceRuleSet `json:"rule_set,omitempty"`
 }
 
 type FusibleRessourceDB struct {
@@ -144,8 +154,13 @@ func NewFusibleRessourceDB() *FusibleRessourceDB {
 func (f *FusibleRessourceDB) MakeFusibleRessource(ProxyRessource *ProxyRessource) (*FusibleRessource, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-
-	newFusible := &FusibleRessource{ID: shortuuid.New(), ProxyRessource: ProxyRessource}
+	var ruleSet *FusibleRessourceRuleSet
+	if ProxyRessource.RuleSet != nil {
+		if ProxyRessource.RuleSet.FusibleRessourceRuleSet != nil {
+			ruleSet = ProxyRessource.RuleSet.FusibleRessourceRuleSet
+		}
+	}
+	newFusible := &FusibleRessource{ID: shortuuid.New(), ProxyRessource: ProxyRessource, RuleSet: ruleSet}
 	f.ressources[newFusible.ID] = newFusible
 	return newFusible, nil
 }
@@ -171,20 +186,25 @@ func ProxyRessourceFromFuseID(db *FusibleRessourceDB, id string) (*ProxyRessourc
 	return db.ConsumeFusibleRessource(id)
 }
 
-func FusibleRessourceFromRessourceID(fdb *FusibleRessourceDB, rdb *RemoteRessourceDB, rid string) (*FusibleRessource, error) {
+func FusibleRessourceFromRessourceID(fdb *FusibleRessourceDB, rdb *RemoteRessourceDB, rid string, req *http.Request) (*FusibleRessource, error) {
 	rdb.mu.RLock()
 	defer rdb.mu.RUnlock()
 	remote, ok := rdb.idToRessource[rid]
 	if !ok {
 		return nil, fmt.Errorf("remote ressource not found")
 	}
-	return fdb.MakeFusibleRessource(&ProxyRessource{url: remote.URL, ID: rid})
+	if remote.RuleSet != nil {
+		if !remote.RuleSet.Validate(req, RequestTypeRequest) {
+			return nil, fmt.Errorf("remote ressource rule set not valid")
+		}
+	}
+	return fdb.MakeFusibleRessource(&ProxyRessource{url: remote.URL, ID: rid, RuleSet: remote.RuleSet})
 }
 
-func UrlToFusibleRessource(fdb *FusibleRessourceDB, url string) (*FusibleRessource, error) {
+func UrlToFusibleRessource(fdb *FusibleRessourceDB, url string, ruleSet *RemoteRessourceRuleSet) (*FusibleRessource, error) {
 	proxyRessource, err := MakeProxyRessource(url)
 	if err != nil {
 		return nil, err
 	}
-	return fdb.MakeFusibleRessource(proxyRessource)
+	return fdb.MakeFusibleRessource(&ProxyRessource{url: proxyRessource.url, ID: proxyRessource.ID, RuleSet: ruleSet})
 }
